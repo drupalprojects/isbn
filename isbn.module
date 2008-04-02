@@ -1,0 +1,200 @@
+<?php
+
+/**
+ * @file
+ *  Maintains a consistant relationship between nodes and ISBNs.
+ */
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function isbn_menu() {
+  $items = array();
+  $items['isbn'] = array(
+    'title' => 'ISBN Conversion',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('isbn_form'),
+    'access arguments' => array('access content'),
+    'weight' => 7,
+  );
+  return $items;
+}
+
+function isbn_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL){
+  switch ($op){
+
+    case 'insert':
+    case 'update':
+      if ($node->isbn['isbn']){
+        $isbn_values = $node->isbn['isbn'];
+      }
+      else {
+        $isbn_values = isbn_find_isbns($node);
+      }
+      db_query("DELETE FROM {isbn_node} WHERE nid = %d", $node->nid);
+      if ($isbn_values){
+        foreach($isbn_values as $isbn_value){
+          if ($isbn_value['isbn'] > 1) {
+            $isbn->isbn = $isbn_value['isbn'];
+            $isbn->isbn10 = $isbn_value['isbn10'];
+            $isbn->nid = $node->nid;
+            drupal_write_record('isbn_node', $isbn);
+          }
+        }
+      }
+      break;
+    
+      case 'load':
+        $result = db_query("SELECT * FROM {isbn_node} WHERE nid = %d", $node->nid);
+        while ($isbn_node = db_fetch_object($result)){
+          if ($isbn_node){
+            $isbn = array('isbn' => $isbn_node->isbn, 'isbn10' => $isbn_node->isbn10,);
+            drupal_alter('isbn', $isbn);
+            $node->isbn[] = $isbn;
+          }
+          //print_r($node);
+        }
+        return $node;
+        break;
+    
+      case 'delete':
+        db_query("DELETE FROM {isbn_node} WHERE nid = %d", $node->nid);
+        break;
+    }
+}
+
+
+function isbn_find_isbns($node){
+  //This should not be so hardcoded but for now it is.
+  //$isbn_fields = variable_get('isbn_fields', null);
+  $isbn_fields = array('field_isbn',);
+  if ($isbn_fields){
+    $isbns = array();
+    foreach($isbn_fields as $isbn_field){
+      if ($node->$isbn_field){
+        if (is_array($node->$isbn_field)){
+          foreach($node->$isbn_field as $field){
+            $isbns = isbn_build_isbns(isbn_clean_field($field['value']));
+            $isbn13 = $isbns['isbn'];
+            $isbn_list[$isbn13] = $isbns;
+          }
+        }
+      }
+    }
+  }
+  return $isbn_list;
+}
+
+
+function isbn_clean_field($field){
+  $bad_chars = array("-", "/", " ");
+  $isbn = strtoupper(trim(str_replace ($bad_chars, "", $field)));
+  if (strlen($isbn) > 9){
+    $test = substr($isbn, 10, 1);
+    if (is_numeric($test)){
+      $isbn = substr($isbn, 0, 13);
+    }
+    else {
+      $isbn = substr($isbn, 0, 10);
+    }
+  }
+  else {
+    $isbn = null;
+  }
+  return $isbn;
+}
+
+
+function isbn_build_isbns($isbn){
+  switch (strlen($isbn)){
+    case 10:
+      if (substr($isbn,9,1) == isbn_check_10($isbn)){
+        $isbns['isbn10'] = $isbn;
+        $check = isbn_check_13('978'.$isbn);
+        $isbns['isbn'] = '978'.substr($isbn,0,9).$check;
+      }
+      else {
+        
+      }
+    break;
+
+    case 13:
+      if (substr($isbn,12,1) == isbn_check_13($isbn)){
+        $isbns['isbn'] = $isbn;
+        $check = isbn_check_10(substr($isbn, 3, 10));
+        $isbns['isbn10'] = substr($isbn, 3, 9).$check;
+      }
+      break;
+  }
+  return $isbns;
+}
+function isbn_check_10($isbn){
+  for ($i = 0; $i < 9; $i++) {
+    $digit = substr($isbn, $i, 1);
+    $total = $total + ($digit * (10-$i));
+  }
+  $remainder = $total % 11;
+  $check = 11 - $remainder;
+  if ($check == 10){
+    $check = 'X';
+  }
+  elseif($check == 11){
+    $check = 0;
+  }
+  return $check;
+}
+
+function isbn_check_13($isbn){
+  $weight = 1;
+  for ($i = 0; $i < 12; $i++) {
+    $digit = substr($isbn, $i, 1);
+    $total = $total + ($digit * $weight);
+    //drupal_set_message(' i '.$i.' digit '.$digit.' x '.$weight.'Total '.$total);
+    if ($weight == 1){
+      $weight = 3;
+    }
+    else {
+      $weight = 1;
+    }
+  }
+  $remainder = $total % 10;
+  $check = 10 - $remainder;
+  if ($check == 10){
+    $check = '0';
+  }
+  return $check;
+}
+
+//This is just used to check the ISBN formula.
+function isbn_form(){
+  $form['isbn'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Give up an ISBN'),
+    '#description' => t('Type in an isbn.'),
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#value' => 'go',
+    '#type' => 'submit',
+    '#submit' => array('isbn_form_submit'),
+  );
+  return $form;
+}
+
+function isbn_form_submit($form, $form_state){
+  $field = $form_state['values']['isbn'];
+  if ($field){
+    $isbn = isbn_clean_field($field);
+  }
+  $isbns = isbn_build_isbns($isbn);
+  drupal_set_message('10 digit ISBN '.$isbns['isbn10']);
+  drupal_set_message('13 digit ISBN '.$isbns['isbn']);
+  if (isbn_check_10($isbns['isbn10'])){
+    drupal_set_message('Valid ISBN 10');
+  }
+  if (isbn_check_13($isbns['isbn'])){
+    drupal_set_message('Valid ISBN 13');
+  }
+}
