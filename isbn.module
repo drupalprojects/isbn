@@ -54,15 +54,27 @@ function isbn_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL){
             drupal_alter('isbn', $isbn);
             $node->isbn[] = $isbn;
           }
-          //print_r($node);
         }
-        return $node;
+        //return $node;
         break;
     
       case 'delete':
         db_query("DELETE FROM {isbn_node} WHERE nid = %d", $node->nid);
         break;
     }
+}
+
+//This might be useful to use with case 'load': 
+function isbn_load_nid($node){
+  $result = db_query("SELECT * FROM {isbn_node} WHERE nid = %d", $node->nid);
+  while ($isbn_node = db_fetch_object($result)){
+    if ($isbn_node){
+      $isbn = array('isbn' => $isbn_node->isbn, 'isbn10' => $isbn_node->isbn10,);
+      drupal_alter('isbn', $isbn);
+      $node->isbn[] = $isbn;
+    }
+  }
+  return $node;
 }
 
 
@@ -197,4 +209,10 @@ function isbn_form_submit($form, $form_state){
   if (isbn_check_13($isbns['isbn'])){
     drupal_set_message('Valid ISBN 13');
   }
+}
+
+function isbn_isbn_alter($isbn){
+  $items = amazon_item_lookup($isbn['isbn10']);
+  $isbn['amazon'] = array_pop($items);
+  return $isbn;
 }

@@ -1,4 +1,3 @@
-; $Id$
 name = ISBN
 description = Keeps track of ISBNs
 version = VERSION
