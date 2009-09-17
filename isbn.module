@@ -99,7 +99,7 @@ function isbn_field_settings($op, $field) {
       return array('isbn_format', 'isbn_validation');
 
     case 'database columns':
-      $columns['value'] = array('type' => 'varchar', 'length' => 16, 'not null' => FALSE, 'sortable' => TRUE, 'views' => TRUE);
+      $columns['value'] = array('type' => 'varchar', 'length' => 20, 'not null' => FALSE, 'sortable' => TRUE, 'views' => TRUE);
       return $columns;
 
     case 'views data':
