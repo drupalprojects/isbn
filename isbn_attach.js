@@ -33,7 +33,7 @@ Drupal.behaviors.isbn = function(context) {
     // Define AJAX validate function
     var isbnValidate = function(isbnValue, isbnFormat) {
 
-      if(isbnValue.length <= isbnFormat){
+      if(isbnValue.length != isbnFormat){
         validISBN = false;
         triggerMessage(validISBN, translate['notEnoughDigits'] + isbnFormat + translate['requiredDigits']);
         return;
