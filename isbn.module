@@ -140,9 +140,6 @@ function isbn_theme() {
     'isbn_formatter_clean' => array(
       'arguments' => array('element' => NULL),
     ),
-    'isbn_formatter_hyphenated' => array(
-      'arguments' => array('element' => NULL),
-    ),
   );
 }
 
@@ -272,11 +269,6 @@ function isbn_field_formatter_info() {
       'field types' => array('isbn'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
-    'hyphenated' => array(
-      'label' => t('ISBN: Hyphenated'),
-      'field types' => array('isbn'),
-      'multiple values' => CONTENT_HANDLE_CORE,
-    ),
   );
 }
 
@@ -292,16 +284,6 @@ function theme_isbn_formatter_raw($element) {
  * Removes dashes and spaces.
  */
 function theme_isbn_formatter_clean($element) {  
-  $string = isbn_clean($element['#item']['value']);
-  return $string;
-}
-
-
-/**
- * Theme function for 'clean' ISBN field formatter
- * Removes dashes and spaces.
- */
-function theme_isbn_formatter_hyphenated($element) {  
   $string = isbn_clean($element['#item']['value']);
   return $string;
 }
