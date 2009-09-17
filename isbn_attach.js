@@ -33,16 +33,13 @@ Drupal.behaviors.isbn = function(context) {
     // Define AJAX validate function
     var isbnValidate = function(isbnValue, isbnFormat) {
 
-      if(isbnValue.length != isbnFormat){
-        validISBN = false;
-        triggerMessage(validISBN, translate['notEnoughDigits'] + isbnFormat + translate['requiredDigits']);
-        return;
-      } 
-
       //Validate ISBN via Ajax call
       var testURL = Drupal.settings.isbn.validateURL + '/' + isbnFormat + '/' + isbnValue ;
-      $.get(testURL, [], function(validISBN){  
-        triggerMessage(eval(validISBN));
+      $.get(testURL, [], function(validISBN){
+        validISBN = Drupal.parseJson(validISBN);
+        console.log(validISBN);
+        
+        triggerMessage(validISBN.valid, translate[validISBN.message]);
       });
     };
 
@@ -54,6 +51,7 @@ Drupal.behaviors.isbn = function(context) {
        
        // Set validation message and set class
        var confirmClass = validISBN ? "ok" : "error";
+       console.log(message);
        if (message) {
          isbnMessage.html(message).addClass(confirmClass);
        } else {

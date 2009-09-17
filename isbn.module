@@ -37,6 +37,95 @@ function isbn_validate_ajax($isbn_format, $isbn_number) {
   drupal_json(isbn_validate_number($isbn_number, $isbn_format));
 }
 
+function isbn_validate_number($number, $format){
+  module_load_include('inc', 'isbn');
+
+  $number = isbn_clean($number);
+  
+  $validate_function = "isbn_validate_$format";
+  
+  $return = $validate_function($number);
+  
+  //Set invalid message.
+  if ($return['valid'] == false && !isset($return['message'])) {
+    $return['message'] = 'confirmFailure';
+    
+    $length = strlen($number);
+    
+    if ($length < $format) {
+      $return['message'] = 'notEnoughDigits';
+    } elseif ($length > $format) {
+      $return['message'] = 'tooManyDigits';
+    }
+
+  }
+  
+  return $return;
+}
+
+function isbn_validate_10($number){
+  return array('valid' => ISN_checksum_OK($number, ISBN_10_DIGIT));
+}
+
+function isbn_validate_8($number){
+  return array('valid' => ISN_checksum_OK($number, ISSN_8_DIGIT));
+}
+
+
+function isbn_validate_13($string){
+
+  $return['valid'] = _isbn_validate_13($string);
+  
+  //Invalidate if not 978 or 979
+  $prefix = substr($string, 0, 3);
+  if ($prefix !== "978" && $prefix !== "979") {
+    $return['valid'] = false;
+    $return['message'] = 'missingPrefix13';
+  }
+  return $return;
+}
+
+/**
+ * Validator for 13 digit ISBNs
+ * from http://www.alixaxel.com/wordpress/wp-content/2007/07/ISBN.php
+ */
+function _isbn_validate_13($string){
+    settype($string, 'string');
+    
+    if (strlen($string) != 13) {
+        return false;
+    }
+
+    $stack = 0;
+    $even = false;
+
+    for ($i = 12; $i >= 0; $i--)
+    {
+        if ($even === true)
+        {
+            $stack += $string[$i] * 3;
+
+            $even = false;
+        }
+
+        else
+        {
+            $stack += $string[$i];
+
+            $even = true;
+        }
+    }
+
+    if ($stack % 10 == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+
 /**
  * Implementation of hook_theme().
  */
@@ -49,6 +138,9 @@ function isbn_theme() {
       'arguments' => array('element' => NULL),
     ),
     'isbn_formatter_clean' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'isbn_formatter_hyphenated' => array(
       'arguments' => array('element' => NULL),
     ),
   );
@@ -149,24 +241,11 @@ function isbn_field($op, &$node, $field, &$items, $teaser, $page) {
 
     case 'sanitize':
       foreach ($items as $delta => $item) {
-        $isbn_formatted = isbn_format_clean($item['value'], $field['isbn_format']);
+        $isbn_formatted = isbn_clean($item['value'], $field['isbn_format']);
         $items[$delta]['clean'] = $isbn_formatted;
       }
   }
 }
-
-function isbn_validate_number($number, $format){
-  module_load_include('inc', 'isbn');
-
-  //The included ISBN code doesn't validate 13 digit numbers...
-  if ($format == ISBN_13_DIGIT) {
-    return isbn_validate_13($number);
-  }
-
-  return ISN_checksum_OK($number, $format);  
-  
-}
-
 
 /**
  * Implementation of hook_content_is_empty().
@@ -193,6 +272,11 @@ function isbn_field_formatter_info() {
       'field types' => array('isbn'),
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
+    'hyphenated' => array(
+      'label' => t('ISBN: Hyphenated'),
+      'field types' => array('isbn'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
   );
 }
 
@@ -208,16 +292,25 @@ function theme_isbn_formatter_raw($element) {
  * Removes dashes and spaces.
  */
 function theme_isbn_formatter_clean($element) {  
-  $string = isbn_format_clean($element['#item']['value']);
+  $string = isbn_clean($element['#item']['value']);
+  return $string;
+}
+
+
+/**
+ * Theme function for 'clean' ISBN field formatter
+ * Removes dashes and spaces.
+ */
+function theme_isbn_formatter_hyphenated($element) {  
+  $string = isbn_clean($element['#item']['value']);
   return $string;
 }
 
 /**
  * Helper function for cleaning dashes and spaces
  */
-function isbn_format_clean($string) {
-  module_load_include('inc', 'isbn');
-  return ISN_clean($string); 
+function isbn_clean($string) {
+  return str_replace(array('x', 'X', ' ', '-', '.'), '', $string);
 }
 
 /**
@@ -414,55 +507,12 @@ function isbn_dynamic_validation() {
         'confirmSuccess' => t('Valid ISBN/ISSN number.'),
         'confirmFailure' => t('Not a valid ISBN/ISSN Number.'), 
         'notEnoughDigits' => t('Not Enough Digits!  '),
+        'tooManyDigits' => t('Too Many Digits!  '),
         'requiredDigits' => t(' digits are required.'),
+        'missingPrefix13' => t('13 Digit ISBNs need to begin with 978 or 979.'),
     )), 'setting');
     $complete = TRUE;
   }
  
 
 }
-
-
-/**
- * Validator for 13 digit ISBNs
- * from http://www.alixaxel.com/wordpress/wp-content/2007/07/ISBN.php
- */
-function isbn_validate_13($string)
-{
-    settype($string, 'string');
-
-    $string = str_replace(array(' ', '-', '.'), '', $string);
-
-    if (strlen($string) != 13)
-    {
-        return false;
-    }
-
-    $stack = 0;
-    $even = false;
-
-    for ($i = 12; $i >= 0; $i--)
-    {
-        if ($even === true)
-        {
-            $stack += $string[$i] * 3;
-
-            $even = false;
-        }
-
-        else
-        {
-            $stack += $string[$i];
-
-            $even = true;
-        }
-    }
-
-    if ($stack % 10 == 0)
-    {
-        return true;
-    }
-
-    return false;
-}
-
