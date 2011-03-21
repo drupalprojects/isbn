@@ -133,6 +133,9 @@ function isbn_theme() {
     'isbn_field' => array(
       'arguments' => array('element' => NULL),
     ),
+    'isbn_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
     'isbn_formatter_raw' => array(
       'arguments' => array('element' => NULL),
     ),
@@ -258,6 +261,11 @@ function isbn_content_is_empty($item, $field) {
  */
 function isbn_field_formatter_info() {
   return array(
+    'default' => array(
+      'label' => t('ISBN: As Entered'),
+      'field types' => array('isbn'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
     'raw' => array(
       'label' => t('ISBN: As Entered'),
       'field types' => array('isbn'),
@@ -269,6 +277,13 @@ function isbn_field_formatter_info() {
       'multiple values' => CONTENT_HANDLE_CORE,
     ),
   );
+}
+
+/**
+ * Theme function for 'default' ISBN field formatter.
+ */
+function theme_isbn_formatter_default($element) {
+  return $element['#item']['value'];
 }
 
 /**
@@ -479,7 +494,7 @@ function isbn_dynamic_validation() {
   global $user;
   // Only need to do once per page.
   if (!$complete) {
-    drupal_add_js(drupal_get_path('module', 'isbn') .'/isbn.js', 'module');
+    //drupal_add_js(drupal_get_path('module', 'isbn') .'/isbn.js', 'module');
     drupal_add_js(drupal_get_path('module', 'isbn') .'/isbn_attach.js', 'module');
 
     drupal_add_js(array(
