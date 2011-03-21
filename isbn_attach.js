@@ -7,7 +7,7 @@ Drupal.behaviors.isbn = function(context) {
 
     //Add message wrapper
     $(this).after("<div class='isbn-validation-message'></div>").parent();
-    
+
     var isbnFormat = isbnInput.attr('isbn-format');
     var isbnMessage = $('div.isbn-validation-message', parent);
 
@@ -26,8 +26,8 @@ Drupal.behaviors.isbn = function(context) {
         return;
       }
       var isbnValue = isbnInput.val();
-      
-      isbnValidate(isbnValue, isbnFormat);     
+
+      isbnValidate(isbnValue, isbnFormat);
     };
 
     // Define AJAX validate function
@@ -37,8 +37,11 @@ Drupal.behaviors.isbn = function(context) {
       var testURL = Drupal.settings.isbn.validateURL + '/' + isbnFormat + '/' + isbnValue ;
       $.get(testURL, [], function(validISBN){
         validISBN = Drupal.parseJson(validISBN);
-        console.log(validISBN);
-        
+        try {
+          console.log(validISBN);
+        }
+        catch($err) {
+        }
         triggerMessage(validISBN.valid, translate[validISBN.message]);
       });
     };
@@ -48,20 +51,24 @@ Drupal.behaviors.isbn = function(context) {
        if (this.confirmClass) {
          isbnMessage.removeClass(this.confirmClass);
        }
-       
+
        // Set validation message and set class
        var confirmClass = validISBN ? "ok" : "error";
-       console.log(message);
+       try {
+         console.log(message);
+       }
+       catch($err) {
+       }
        if (message) {
          isbnMessage.html(message).addClass(confirmClass);
        } else {
          isbnMessage.html(translate["confirm" + (validISBN ? "Success" : "Failure")]).addClass(confirmClass);
        }
-       isbnInput.removeClass('throbbing'); 
+       isbnInput.removeClass('throbbing');
        this.confirmClass = confirmClass;
        isbnMessage.show();
     }
-    
+
     // Delayed check
     var delayCheck = function() {
       // Postpone the check since the user is most likely still typing.

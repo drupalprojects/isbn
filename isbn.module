@@ -229,9 +229,33 @@ function isbn_field($op, &$node, $field, &$items, $teaser, $page) {
             //VALIDATE ISBN HERE
             if ($field['isbn_validation'] !== ISBN_NO_VALIDATION) {
               $valid = isbn_validate_number($item['value'], $field['isbn_format']);
-              if (!$valid) {
-                form_set_error($error_element, t('ISBN/ISSN Validation Failed'));
-              } 
+//               if (!$valid) {
+//                 form_set_error($error_element, t('ISBN/ISSN Validation Failed'));
+								if (!isset($valid) || $valid['valid'] == false) {
+									switch ($valid['message']) {
+											case 'confirmSuccess': 
+												form_set_error($error_element, t('Valid ISBN/ISSN number.')); 
+												break;
+											case 'confirmFailure': 
+												form_set_error($error_element, t('Not a valid ISBN/ISSN Number.')); 
+												break;
+											case 'notEnoughDigits': 
+												form_set_error($error_element, t('Not Enough Digits!  ')); 
+												break;
+											case 'tooManyDigits': 
+												form_set_error($error_element, t('Too Many Digits!  '));
+												break;
+											case 'requiredDigits': 
+												form_set_error($error_element, t(' digits are required.'));
+												break;
+											case 'missingPrefix13': 
+												form_set_error($error_element, t('13 Digit ISBNs need to begin with 978 or 979.'));
+												break;
+											default: 
+												form_set_error($error_element, t('ISBN/ISSN Validation Failed'));
+									}
+								}
+//              } 
             }           
           }
         }
