@@ -536,3 +536,30 @@ function isbn_dynamic_validation() {
  
 
 }
+
+/**
+ * Implementation of hook_token_list() 
+ */
+function isbn_token_list($type = 'all') {
+  if ($type == 'field' || $type == 'all') {
+    $tokens = array();
+
+    $tokens['isbn']['raw']       = t('Raw, unfiltered ISBN');
+    $tokens['isbn']['formatted'] = t('Formatted and filtered ISBN');
+
+    return $tokens;
+  }
+}
+
+/**
+ * Implementation of hook_token_values().
+ */
+function isbn_token_values($type, $object = NULL) {
+  if ($type == 'field') {
+    $item = $object[0];
+
+    $tokens['raw']  = $item['isbn'];
+    $tokens['formatted'] = isset($item['view']) ? $item['view'] : '';
+    return $tokens;
+  }
+ }
