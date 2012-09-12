@@ -562,4 +562,15 @@ function isbn_token_values($type, $object = NULL) {
     $tokens['formatted'] = isset($item['view']) ? $item['view'] : '';
     return $tokens;
   }
- }
+}
+
+/**
+ * Implementation of hook_content_generate().
+ */
+function isbn_content_generate($node, $field) {
+  $random_isbn = '';
+  for ($i=1; $i <= $field['isbn_format']; $i++){
+    $random_isbn .= mt_rand(0, 9);
+  }
+  return array('value' => $random_isbn);
+}
