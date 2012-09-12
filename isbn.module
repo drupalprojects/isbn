@@ -227,7 +227,7 @@ function isbn_field($op, &$node, $field, &$items, $teaser, $page) {
           if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
           if (!empty($item['value'])) {
             //VALIDATE ISBN HERE
-            if ($field['isbn_validation'] !== ISBN_NO_VALIDATION) {
+            if ($field['isbn_validation'] != ISBN_NO_VALIDATION) {
               $valid = isbn_validate_number($item['value'], $field['isbn_format']);
 //               if (!$valid) {
 //                 form_set_error($error_element, t('ISBN/ISSN Validation Failed'));
