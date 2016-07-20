@@ -29,7 +29,7 @@ function isbn_field_validate($obj_type, $object, $field, $instance, $langcode, $
 
     if ($isbn != '' && !isbn_check_10($isbn) && !isbn_check_13($isbn)) {
 
-      if (strlen($isbn) < 10 || strlen($isbn) > 13) {
+      if (strlen($isbn) < 10 && strlen($isbn) > 13) {
         $message = t('"%isbn" isn\'t a valid ISBN number. A valid ISBN number has 10 or 13 digits.', array('%isbn' => $isbn));
       }
       else {
