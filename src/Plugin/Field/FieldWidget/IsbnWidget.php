@@ -35,7 +35,6 @@ class IsbnWidget extends WidgetBase {
       '#type' => 'textfield',
       '#default_value' => $value,
       '#size' => 13,
-      '#maxlength' => 13,
       '#element_validate' => array(
         array($this, 'validate'),
       ),
