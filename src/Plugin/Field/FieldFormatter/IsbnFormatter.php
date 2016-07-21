@@ -9,6 +9,7 @@ namespace Drupal\isbn\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Nicebooks\Isbn\IsbnTools as Isbn;
 
 /**
  * Plugin implementation of the 'isbn_default' formatter.
@@ -45,10 +46,15 @@ class IsbnFormatter extends FormatterBase {
       // Render each element as markup.
       $element[$delta] = array(
         '#type' => 'markup',
-        '#markup' => $item->value,
+        '#markup' => $this->format($item->value),
       );
     }
 
     return $element;
+  }
+
+  private function format($isbn_number) {
+    $isbn = new Isbn();
+    return $isbn->format($isbn_number);
   }
 }

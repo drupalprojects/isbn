@@ -18,8 +18,8 @@
             "role": "Co-Maintainer"
         },
         {
-            "name": "Brecht Ceyssens",
-            "role": "Andy Austin"
+            "name": "Andy Austin",
+            "role": "Creator"
         }
     ],
     "support": {
@@ -28,6 +28,6 @@
         "source": "http://git.drupal.org/project/isbn.git"
     },
     "require": {
-        "biblys/isbn": "~2.0"
+        "nicebooks/isbn": "dev-master"
     }
 }
