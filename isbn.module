@@ -15,6 +15,7 @@ function isbn_field_info() {
       'description' => t('This field stores and renders ISBN numbers.'),
       'default_widget' => 'isbn_textfield',
       'default_formatter' => 'isbn_default',
+      'property_type' => 'text',
     ),
   );
 }
