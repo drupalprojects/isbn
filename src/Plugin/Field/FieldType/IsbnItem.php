@@ -1,11 +1,5 @@
 <?php
 
-
-/**
- * @file
- * Contains Drupal\isbn\Plugin\Field\FieldType\IsbnItem.
- */
-
 namespace Drupal\isbn\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;

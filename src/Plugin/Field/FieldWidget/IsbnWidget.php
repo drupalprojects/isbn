@@ -1,11 +1,5 @@
 <?php
 
-
-/**
- * @file
- * Contains \Drupal\isbn\Plugin\Field\FieldWidget\IsbnWidget.
- */
-
 namespace Drupal\isbn\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\Isbn\Plugin\Field\FieldFormatter\IsbnFormatter.
- */
-
 namespace Drupal\isbn\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
