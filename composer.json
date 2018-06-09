@@ -28,6 +28,6 @@
         "source": "http://git.drupal.org/project/isbn.git"
     },
     "require": {
-        "nicebooks/isbn": "dev-master"
+        "nicebooks/isbn": "~0.0"
     }
 }
