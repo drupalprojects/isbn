@@ -15,23 +15,25 @@ use Drupal\Core\TypedData\DataDefinition;
  *   module = "isbn",
  *   description = @Translation("Add ability to insert an ISBN field."),
  *   default_widget = "isbn_widget",
- *   default_formatter = "isbn_formatter"
+ *   default_formatter = "isbn_formatter",
+ *   constraints = {"IsbnValidation" = {}}
  * )
  */
 class IsbnItem extends FieldItemBase {
+
   /**
    * {@inheritdoc}
    */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
-    return array(
-      'columns' => array(
-        'value' => array(
+    return [
+      'columns' => [
+        'value' => [
           'type' => 'text',
           'size' => 'tiny',
           'not null' => FALSE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 
   /**
@@ -39,7 +41,7 @@ class IsbnItem extends FieldItemBase {
    */
   public function isEmpty() {
     $value = $this->get('value')->getValue();
-    return $value === NULL || $value === '';
+    return empty($value);
   }
 
   /**
@@ -47,8 +49,10 @@ class IsbnItem extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['value'] = DataDefinition::create('string')
+      ->addConstraint('IsbnValidation')
       ->setLabel(t('ISBN value'));
 
     return $properties;
   }
+
 }

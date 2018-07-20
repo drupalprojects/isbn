@@ -2,31 +2,29 @@
 
 namespace Drupal\isbn\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
-use Nicebooks\Isbn\IsbnTools as Isbn;
+use Drupal\Core\Field\FormatterBase;
 
 /**
  * Plugin implementation of the 'isbn_default' formatter.
  *
  * @FieldFormatter(
- *   id = "isbn_formatter",
- *   label = @Translation("Isbn text"),
+ *   id = "isbn_default",
+ *   label = @Translation("Non formatted value"),
  *   field_types = {
  *     "isbn"
  *   }
  * )
  */
-class IsbnFormatter extends FormatterBase {
+class IsbnPlainFormatter extends FormatterBase {
 
   /**
    * {@inheritdoc}
    */
   public function settingsSummary() {
-    $summary = array();
-    $settings = $this->getSettings();
+    $summary = [];
 
-    $summary[] = t('Displays the ISBN string.');
+    $summary[] = t('Displays the ISBN string without formatting it.');
 
     return $summary;
   }
@@ -35,21 +33,16 @@ class IsbnFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
-    $element = array();
+    $element = [];
 
     foreach ($items as $delta => $item) {
       // Render each element as markup.
-      $element[$delta] = array(
+      $element[$delta] = [
         '#type' => 'markup',
-        '#markup' => $this->format($item->value),
-      );
+        '#markup' => $item->value,
+      ];
     }
 
     return $element;
-  }
-
-  private function format($isbn_number) {
-    $isbn = new Isbn();
-    return $isbn->format($isbn_number);
   }
 }
